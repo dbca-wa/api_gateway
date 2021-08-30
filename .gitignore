@@ -1,0 +1,13 @@
+.env
+venv/
+venv2/
+node_modules/
+mooring/cache/*
+
+# Byte-compiled / optimized / DLL files
+apigw/__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite*
+
