@@ -30,7 +30,7 @@ class APIService(models.Model):
     service_endpoint_url = models.CharField(max_length=1024, help_text="URL of the API service to connect into", default="")
 
     # Basic Auth (For Service type 2,3)
-    basic_auth_enabled = models.BooleanField(default=True)
+    basic_auth_enabled = models.BooleanField(default=False)
     basic_auth_username = EncryptedCharField(max_length=512, default='', blank=True, null=True)
     basic_auth_password = EncryptedCharField(max_length=512, default='', blank=True, null=True)
 
