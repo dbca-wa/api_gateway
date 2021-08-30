@@ -45,7 +45,7 @@ RUN service cron start
 RUN chmod 755 /startup.sh
 COPY gunicorn.ini ./
 #COPY ledger ./ledger
-RUN touch /app/apigw/.env
+RUN touch /app/.env
 COPY apigw ./apigw
 #COPY .git/refs/heads/master /app/git_hash
 RUN mkdir /app/apigw/cache/
