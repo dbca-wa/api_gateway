@@ -47,6 +47,7 @@ COPY gunicorn.ini ./
 #COPY ledger ./ledger
 RUN touch /app/.env
 COPY apigw ./apigw
+COPY manage.py ./
 #COPY .git/refs/heads/master /app/git_hash
 RUN mkdir /app/apigw/cache/
 RUN chmod 777 /app/apigw/cache/
