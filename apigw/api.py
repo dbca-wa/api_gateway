@@ -27,6 +27,7 @@ def proxy_request(request, *args, **kwargs):
              client_ip = request.GET.get('client_ip', 'NoIp')
              paramGET = request.GET.get('paramGET', '{}')
              paramPOST = request.GET.get('paramPOST', '{}')
+             error=''
 
              valid_client_ip = False
              try:
@@ -40,15 +41,28 @@ def proxy_request(request, *args, **kwargs):
              asq = api_service_query[0]
              server_ip = common_iplookup.get_client_ip(request)
              allowed = common_iplookup.api_allow(server_ip,asq.id)
+
+             throttle_limit_reached = False
+             if asq.throttling_enabled is True:
+                  throttle_time = datetime.datetime.now() - datetime.timedelta(seconds=asq.throttle_period)
+                  request_count = models.APIServiceLog.objects.filter(api_service=asq,client_ip=client_ip, created__gt=throttle_time).count()
+                  if request_count > asq.throttle_limit:
+                         throttle_limit_reached = True
+                         error = "Request Limit Reached ("+str(request_count)+")"
+
+
              models.APIServiceLog.objects.create(api_service=asq,
                                                  service_slug_url=asq.service_slug_url,
                                                  server_ip=server_ip,
                                                  client_ip=client_ip,
                                                  parameters_get=paramGET,
                                                  parameters_post=paramPOST,
+                                                 error=error,
                                                  allowed=allowed
 
                                          )
+             if throttle_limit_reached is True:
+                  return HttpResponse(json.dumps({'status': 503, 'message' : error}), content_type='application/json')
              
              if allowed is True:
                   if asq.group in groups:
