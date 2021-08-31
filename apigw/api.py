@@ -48,6 +48,7 @@ def proxy_request(request, *args, **kwargs):
                   request_count = models.APIServiceLog.objects.filter(api_service=asq,client_ip=client_ip, created__gt=throttle_time).count()
                   if request_count > asq.throttle_limit:
                          throttle_limit_reached = True
+                         allowed = False
                          error = "Request Limit Reached ("+str(request_count)+")"
 
 
