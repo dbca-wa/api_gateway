@@ -52,6 +52,51 @@ def proxy_request(request, *args, **kwargs):
                          error = "Request Limit Reached ("+str(request_count)+")"
 
 
+             #models.APIServiceLog.objects.create(api_service=asq,
+             #                                    service_slug_url=asq.service_slug_url,
+             #                                    server_ip=server_ip,
+             #                                    client_ip=client_ip,
+             #                                    parameters_get=paramGET,
+             #                                    parameters_post=paramPOST,
+             #                                    error=error,
+             #                                    allowed=allowed
+
+             #                            )
+             if throttle_limit_reached is True:
+                  APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,error,allowed)
+                  return HttpResponse(json.dumps({'status': 503, 'message' : error}), content_type='application/json')
+             
+             if allowed is True:
+                  if asq.group in groups:
+                       if asq.service_type == 1:
+                            response = service_requests.aws_service_request(request,asq)
+                            APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"",allowed)
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       elif asq.service_type == 2:
+                            response = service_requests.http_request(request,asq,'get')
+                            APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"",allowed)
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       elif asq.service_type == 3:
+                            response = service_requests.http_request(request,asq,'post')
+                            APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"",allowed)
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       else:
+                            APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"Service does not have a service type",allowed)
+                            return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json')
+                  else:
+                      APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,'Permission Denied',allowed)
+                      return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json')
+                  return HttpResponse(json.dumps({}), content_type='application/json')
+             else:
+                  APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"Access Denied",allowed)
+                  return HttpResponse(json.dumps({'status': 403, 'message' : 'Access Denied'}), content_type='application/json')    
+         else:
+             return HttpResponse(json.dumps({'status': 404, 'message': "Message Service API not found"}), content_type='application/json', status=404)
+    else:
+        return HttpResponse(json.dumps({'status': 403, 'message': "Forbidden Authentication"}), content_type='application/json', status=404)
+
+def APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,error,allowed):
+
              models.APIServiceLog.objects.create(api_service=asq,
                                                  service_slug_url=asq.service_slug_url,
                                                  server_ip=server_ip,
@@ -60,30 +105,6 @@ def proxy_request(request, *args, **kwargs):
                                                  parameters_post=paramPOST,
                                                  error=error,
                                                  allowed=allowed
+                                                )
 
-                                         )
-             if throttle_limit_reached is True:
-                  return HttpResponse(json.dumps({'status': 503, 'message' : error}), content_type='application/json')
-             
-             if allowed is True:
-                  if asq.group in groups:
-                       if asq.service_type == 1:
-                            response = service_requests.aws_service_request(request,asq)
-                            return HttpResponse(response, content_type='application/json', status=200)
-                       elif asq.service_type == 2:
-                            response = service_requests.http_request(request,asq,'get')
-                            return HttpResponse(response, content_type='application/json', status=200)
-                       elif asq.service_type == 3:
-                            response = service_requests.http_request(request,asq,'post')
-                            return HttpResponse(response, content_type='application/json', status=200)
-                       else:
-                            return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json')
-                  else:
-                      return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json')
-                  return HttpResponse(json.dumps({}), content_type='application/json')
-             else:
-                  return HttpResponse(json.dumps({'status': 403, 'message' : 'Access Denied'}), content_type='application/json')    
-         else:
-             return HttpResponse(json.dumps({'status': 404, 'message': "Message Service API not found"}), content_type='application/json', status=404)
-    else:
-        return HttpResponse(json.dumps({'status': 403, 'message': "Forbidden Authentication"}), content_type='application/json', status=404)
+
