@@ -48,11 +48,28 @@ class APIService(models.Model):
     cache_enabled = models.BooleanField(default=True)
     cache_limit = models.IntegerField(help_text="Cache expiry limit in seconds", default=60)
 
+    # Network Restrictions
+    network_restriction_enabled = models.BooleanField(default=True) 
+    allowed_ips = models.TextField(null=True, blank=True, default='', help_text="Use network ranges format: eg 1 ip = 10.1.1.1/32 or for a c class block of ips use 192.168.1.0/24 etc. Each range should be on it own line.")
+
+    notes = models.TextField(null=True, blank=True, default='')
+
     group = models.ForeignKey(Group, blank=True, null=True, related_name='group', on_delete=models.SET_NULL)
-
+    created = models.DateTimeField(auto_now_add=True, blank=True)
     enabled = models.BooleanField(default=True)
-
-
 
     def __str__(self):
         return '{}'.format(self.service_slug_url)
+
+
+
+class APIServiceLog(models.Model):
+      api_service =  models.ForeignKey(APIService, blank=True, null=True, related_name='api_service_id', on_delete=models.SET_NULL)
+      service_slug_url = models.CharField(max_length=1024)
+      server_ip = models.CharField(max_length=100, null=True, blank=True)
+      client_ip = models.CharField(max_length=100, null=True, blank=True)
+      parameters_get = models.TextField(null=True, blank=True, default='')
+      parameters_post = models.TextField(null=True, blank=True, default='')
+      allowed=models.BooleanField(default=False)
+      created = models.DateTimeField(auto_now_add=True)
+

@@ -10,6 +10,8 @@ from apigw import models
 from apigw import service_requests
 import base64
 import datetime
+import ipaddress
+from apigw import common_iplookup
 #from ledger.accounts.models import EmailUser
 
 
@@ -22,22 +24,50 @@ def proxy_request(request, *args, **kwargs):
          if models.APIService.objects.filter(service_slug_url=slug).count() > 0:
              groups = request.user.groups.all()
              api_service_query = models.APIService.objects.filter(service_slug_url=slug)
+             client_ip = request.GET.get('client_ip', 'NoIp')
+             paramGET = request.GET.get('paramGET', '{}')
+             paramPOST = request.GET.get('paramPOST', '{}')
+
+             valid_client_ip = False
+             try:
+                 ipaddress.ip_address(client_ip)
+                 valid_client_ip = True
+             except:
+                 pass
+             if valid_client_ip is False:
+                   return HttpResponse(json.dumps({'status': 503, 'message' : 'Invalid Client IP'}), content_type='application/json')
+
              asq = api_service_query[0]
-             if asq.group in groups:
-                  if asq.service_type == 1:
-                      response = service_requests.aws_service_request(request,asq)
-                      return HttpResponse(response, content_type='application/json', status=200)
-                  elif asq.service_type == 2:
-                       response = service_requests.http_request(request,asq,'get')
-                       return HttpResponse(response, content_type='application/json', status=200)
-                  elif asq.service_type == 3:
-                       response = service_requests.http_request(request,asq,'post')
-                       return HttpResponse(response, content_type='application/json', status=200)
+             server_ip = common_iplookup.get_client_ip(request)
+             allowed = common_iplookup.api_allow(server_ip,asq.id)
+             models.APIServiceLog.objects.create(api_service=asq,
+                                                 service_slug_url=asq.service_slug_url,
+                                                 server_ip=server_ip,
+                                                 client_ip=client_ip,
+                                                 parameters_get=paramGET,
+                                                 parameters_post=paramPOST,
+                                                 allowed=allowed
+
+                                         )
+             
+             if allowed is True:
+                  if asq.group in groups:
+                       if asq.service_type == 1:
+                            response = service_requests.aws_service_request(request,asq)
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       elif asq.service_type == 2:
+                            response = service_requests.http_request(request,asq,'get')
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       elif asq.service_type == 3:
+                            response = service_requests.http_request(request,asq,'post')
+                            return HttpResponse(response, content_type='application/json', status=200)
+                       else:
+                            return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json')
                   else:
-                       return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json')
+                      return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json')
+                  return HttpResponse(json.dumps({}), content_type='application/json')
              else:
-                 return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json')
-             return HttpResponse(json.dumps({}), content_type='application/json')
+                  return HttpResponse(json.dumps({'status': 403, 'message' : 'Access Denied'}), content_type='application/json')    
          else:
              return HttpResponse(json.dumps({'status': 404, 'message': "Message Service API not found"}), content_type='application/json', status=404)
     else:
