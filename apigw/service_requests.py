@@ -13,7 +13,6 @@ def aws_service_request(request,asq):
 
      apidata = cache.get(cache_string)
      if apidata is None or asq.cache_enabled is False:
-         print ("NON CACHE")
          aws_access_key =asq.aws_access_key
          aws_secret_access_key = asq.aws_secret_access_key
          aws_token = asq.aws_token
@@ -64,23 +63,21 @@ def aws_service_request(request,asq):
                encode_get_url = "?"+encode_get_url
          r = requests.get(service_endpoint_url+encode_get_url, auth=auth)
          if asq.cache_enabled:  
-             print ("CACHING ENABLED")
              cache.set(cache_string, r.text, asq.cache_limit)
          apidata = r.text
      else:
-          print ("CACHE")
           pass
 
      return apidata
 
 def http_request(request,asq, http_type):
+     
      paramGET = request.GET.get('paramGET', '{}')
      paramPOST = request.GET.get('paramPOST', '{}')
      cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)
 
      apidata = cache.get(cache_string)
      if apidata is None or asq.cache_enabled is False:
-         print ("NON CACHE")
          service_endpoint_url = asq.service_endpoint_url
          basic_auth_enabled = asq.basic_auth_enabled
          basic_auth_username = asq.basic_auth_username
@@ -126,11 +123,9 @@ def http_request(request,asq, http_type):
                 r = requests.get(service_endpoint_url+encode_get_url)
 
          if asq.cache_enabled:
-             print ("CACHING ENABLED")
              cache.set(cache_string, r.text, asq.cache_limit)
          apidata = r.text
      else:
-          print ("CACHE")
           pass
 
      return apidata

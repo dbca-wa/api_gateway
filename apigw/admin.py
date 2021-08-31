@@ -29,7 +29,20 @@ class APIService(admin.ModelAdmin):
               ('Group Access', {
                    'fields': ('group',),
               }),
+              ('Network Access', {
+                   'fields': ('network_restriction_enabled','allowed_ips'),
+              }),
+              ('Notes', {
+                   'fields': ('notes',),
+              }),
               ('Status', {
                    'fields': ('enabled',),
               }),              
      )
+
+
+@admin.register(models.APIServiceLog)
+class APIServiceLog(admin.ModelAdmin):
+     list_display = ('service_slug_url','server_ip','client_ip','parameters_get','parameters_post','allowed','created')
+     readonly_fields=('api_service','service_slug_url','server_ip','client_ip','parameters_get','parameters_post','allowed','created')
+
