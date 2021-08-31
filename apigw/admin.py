@@ -10,7 +10,7 @@ from apigw import models
 
 @admin.register(models.APIService)
 class APIService(admin.ModelAdmin):
-    list_display = ('id','service_slug_url','service_type','service_endpoint_url',)
+    list_display = ('id','service_slug_url','service_type','service_endpoint_url','cache_enabled','cache_limit','enabled')
     list_filter = ('enabled',)
     search_fields = ('service_slug_url','service_endpoint_url',)
     fieldsets = (
@@ -32,6 +32,9 @@ class APIService(admin.ModelAdmin):
               ('Network Access', {
                    'fields': ('network_restriction_enabled','allowed_ips'),
               }),
+              ('Throttling', {
+                   'fields': ('throttling_enabled','throttle_limit','throttle_period'),
+              }),
               ('Notes', {
                    'fields': ('notes',),
               }),
@@ -43,6 +46,6 @@ class APIService(admin.ModelAdmin):
 
 @admin.register(models.APIServiceLog)
 class APIServiceLog(admin.ModelAdmin):
-     list_display = ('service_slug_url','server_ip','client_ip','parameters_get','parameters_post','allowed','created')
-     readonly_fields=('api_service','service_slug_url','server_ip','client_ip','parameters_get','parameters_post','allowed','created')
+     list_display = ('service_slug_url','server_ip','client_ip','parameters_get','parameters_post','error','allowed','created')
+     readonly_fields=('api_service','service_slug_url','server_ip','client_ip','parameters_get','parameters_post','error','allowed','created')
 

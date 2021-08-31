@@ -52,9 +52,17 @@ class APIService(models.Model):
     network_restriction_enabled = models.BooleanField(default=True) 
     allowed_ips = models.TextField(null=True, blank=True, default='', help_text="Use network ranges format: eg 1 ip = 10.1.1.1/32 or for a c class block of ips use 192.168.1.0/24 etc. Each range should be on it own line.")
 
-    notes = models.TextField(null=True, blank=True, default='')
+    # Throttling
+    throttling_enabled = models.BooleanField(default=True)
+    throttle_limit = models.IntegerField(help_text="Query throttle limit per client IP (Request Count)", default=20)
+    throttle_period = models.IntegerField(help_text="Time limit for throttle limit (in seconds) ", default=60)
 
+    # Notes
+    notes = models.TextField(null=True, blank=True, default='')
+  
+    # Group Permissions
     group = models.ForeignKey(Group, blank=True, null=True, related_name='group', on_delete=models.SET_NULL)
+
     created = models.DateTimeField(auto_now_add=True, blank=True)
     enabled = models.BooleanField(default=True)
 
@@ -70,6 +78,7 @@ class APIServiceLog(models.Model):
       client_ip = models.CharField(max_length=100, null=True, blank=True)
       parameters_get = models.TextField(null=True, blank=True, default='')
       parameters_post = models.TextField(null=True, blank=True, default='')
+      error  = models.CharField(max_length=1024, null=True, blank=True)
       allowed=models.BooleanField(default=False)
       created = models.DateTimeField(auto_now_add=True)
 
