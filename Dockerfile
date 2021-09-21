@@ -5,6 +5,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Perth
 ENV PRODUCTION_EMAIL=True
 ENV SECRET_KEY="ThisisNotRealKey"
+# Key for Build purposes only
+ENV FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
+# Key for Build purposes only
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
