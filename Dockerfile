@@ -51,7 +51,7 @@ COPY manage.py ./
 #COPY .git/refs/heads/master /app/git_hash
 RUN mkdir /app/apigw/cache/
 RUN chmod 777 /app/apigw/cache/
-#RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 RUN apt-get install --no-install-recommends -y python-pil
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
