@@ -23,6 +23,7 @@ class APIService(models.Model):
            (1, 'AWS (AWSRequestsAuth)'),
            (2, 'HTTP/s Request (GET)'),
            (3, 'HTTP/s Request (POST)'),
+           (4, 'OAuth2 Bearer (GET)')
     )
 
     service_slug_url = models.CharField(unique=True, max_length=1024, help_text="Choose a url slug name which will binded to this api, eg(dbca-locations-data)") 
@@ -42,6 +43,15 @@ class APIService(models.Model):
     aws_host=models.CharField(max_length=256, default='', blank=True, null=True)
     aws_region=models.CharField(max_length=256, default='', blank=True, null=True)
     aws_service=models.CharField(max_length=256, default='', blank=True, null=True)
+    
+    # Oauth2 Bearer Token
+    oauth2_url=models.CharField(max_length=256, default='', blank=True, null=True)
+    oauth2_client_id=models.CharField(max_length=256, default='', blank=True, null=True)
+    oauth2_secret=models.CharField(max_length=256, default='', blank=True, null=True)
+    
+    #oauth2_api_url=models.CharField(max_length=256, default='', blank=True, null=True)
+    oauth2_api_ocp_apim_subscription_key=models.CharField(max_length=256, default='', blank=True, null=True)
+    
     # HTTP Auth Request
    
     # Cache Requests

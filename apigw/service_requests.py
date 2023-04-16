@@ -4,6 +4,8 @@ import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from django.core.cache import cache
 from requests.auth import HTTPBasicAuth 
+import urllib.request
+import urllib.parse
 
 def aws_service_request(request,asq):
      print ("AWS SERVICE REQUEST")
@@ -130,3 +132,85 @@ def http_request(request,asq, http_type):
 
      return apidata
 
+def oauth_bearer(request,asq, http_type):
+     
+     paramGET = request.GET.get('paramGET', '{}')
+     paramPOST = request.GET.get('paramPOST', '{}')
+     urlappendGET = request.GET.get('urlappendGET', '')
+     cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)
+
+     apidata = cache.get(cache_string)
+     if apidata is None or asq.cache_enabled is False:
+         service_endpoint_url = asq.service_endpoint_url
+         oauth2_url = asq.oauth2_url
+         oauth2_client_id = asq.oauth2_client_id
+         oauth2_secret = asq.oauth2_secret
+         oauth2_api_ocp_apim_subscription_key = asq.oauth2_api_ocp_apim_subscription_key
+
+         if oauth2_url is None:
+             oauth2_url = ''
+         if oauth2_client_id is None:
+             oauth2_client_id = ''
+         if oauth2_secret is None:
+             oauth2_secret = ''             
+         if service_endpoint_url is None:
+             service_endpoint_url = ''
+
+         if urlappendGET:
+             oauth2_url = oauth2_url+urlappendGET
+         paramGET_obj= json.loads(paramGET)
+         paramPOST_obj= json.loads(paramPOST)
+
+         #print (paramGET_obj['boatNumber'])
+         encode_get_url = ""
+         for g in paramGET_obj.keys():
+             if encode_get_url == "":
+                 encode_get_url = encode_get_url +g+"="+paramGET_obj[g]
+             else:
+                 encode_get_url = encode_get_url +"&"+g+"="+paramGET_obj[g]
+
+         for g in paramPOST_obj.keys():
+             if encode_get_url == "":
+                 encode_get_url = encode_get_url +g+"="+paramGET_obj[g]
+             else:
+                 encode_get_url = encode_get_url +"&"+g+"="+paramGET_obj[g]
+
+         if service_endpoint_url[-1:] != '?' and len(encode_get_url) > 0:
+               encode_get_url = "?"+encode_get_url
+               
+
+         body = {
+            'client_id' : oauth2_client_id,
+            'client_secret' : oauth2_secret,
+            'grant_type' : 'client_credentials'
+         }
+         data = urllib.parse.urlencode(body).encode("utf-8")
+         req = urllib.request.Request(oauth2_url, data)
+         response = urllib.request.urlopen(req)
+         jsonResponse = json.loads(response.read())
+         aadToken = jsonResponse["access_token"]
+         api_headers = { 
+                    "User-agent" : "Mozilla/5.0",
+                    "Ocp-Apim-Subscription-Key" : oauth2_api_ocp_apim_subscription_key,
+                    "Authorization" : "Bearer " + aadToken
+                   }
+
+         data = {}
+         req = urllib.request.Request(url, data, api_headers)
+         r = urllib.request.urlopen(req)
+
+
+         
+            # auth=auth=HTTPBasicAuth(basic_auth_username,basic_auth_password)
+            # if http_type == 'post': 
+            #     r = requests.post(service_endpoint_url+encode_get_url, auth=auth, data=paramPOST_obj)
+            # if http_type == 'get':
+            #     r = requests.get(service_endpoint_url+encode_get_url, auth=auth)
+            
+         if asq.cache_enabled:
+             cache.set(cache_string, r.text, asq.cache_limit)
+         apidata = r.text
+     else:
+          pass
+
+     return apidata
