@@ -23,6 +23,9 @@ class APIService(admin.ModelAdmin):
               ('Amazon Web Services (AWS)', {
                    'fields': ('aws_access_key','aws_secret_access_key', 'aws_token','aws_host','aws_region','aws_service'),
               }),
+              ('OAuth2', {
+                   'fields': ('oauth2_url','oauth2_client_id', 'oauth2_secret','oauth2_api_ocp_apim_subscription_key'),
+              }),              
               ('Cache', {
                    'fields': ('cache_enabled','cache_limit',),
               }),

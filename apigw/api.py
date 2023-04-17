@@ -64,7 +64,7 @@ def proxy_request(request, *args, **kwargs):
              #                            )
              if throttle_limit_reached is True:
                   APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,error,allowed)
-                  return HttpResponse(json.dumps({'status': 503, 'message' : error}), content_type='application/json')
+                  return HttpResponse(json.dumps({'status': 503, 'message' : error}), content_type='application/json', status=503)
              
              if allowed is True:
                   if asq.group in groups:
@@ -80,20 +80,24 @@ def proxy_request(request, *args, **kwargs):
                             response = service_requests.http_request(request,asq,'post')
                             APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"",allowed)
                             return HttpResponse(response, content_type='application/json', status=200)
+                       elif asq.service_type == 4:
+                            response = service_requests.oauth_bearer(request,asq,'get')
+                            APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"",allowed)
+                            return HttpResponse(response, content_type='application/json', status=200)                                              
                        else:
                             APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"Service does not have a service type",allowed)
-                            return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json')
+                            return HttpResponse(json.dumps({'status': 503, 'message' : 'Service does not have a service type'}), content_type='application/json', status=503)
                   else:
                       APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,'Permission Denied',allowed)
-                      return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json')
+                      return HttpResponse(json.dumps({'status': 403, 'message' : 'Permission Denied'}), content_type='application/json', status=403)
                   return HttpResponse(json.dumps({}), content_type='application/json')
              else:
                   APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,"Access Denied",allowed)
-                  return HttpResponse(json.dumps({'status': 403, 'message' : 'Access Denied'}), content_type='application/json')    
+                  return HttpResponse(json.dumps({'status': 403, 'message' : 'Access Denied'}), content_type='application/json', status=403)    
          else:
              return HttpResponse(json.dumps({'status': 404, 'message': "Message Service API not found"}), content_type='application/json', status=404)
     else:
-        return HttpResponse(json.dumps({'status': 403, 'message': "Forbidden Authentication"}), content_type='application/json', status=404)
+        return HttpResponse(json.dumps({'status': 403, 'message': "Forbidden Authentication"}), content_type='application/json', status=403)
 
 def APIServiceLogging(asq,server_ip,client_ip,paramGET,paramPOST,error,allowed):
 
