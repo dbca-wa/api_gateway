@@ -156,13 +156,16 @@ def oauth_bearer(request,asq, http_type):
          if service_endpoint_url is None:
              service_endpoint_url = ''
 
-         if urlappendGET:
-             oauth2_url = oauth2_url+urlappendGET
+
          paramGET_obj= json.loads(paramGET)
          paramPOST_obj= json.loads(paramPOST)
 
          #print (paramGET_obj['boatNumber'])
          encode_get_url = ""
+         
+         if urlappendGET:
+             service_endpoint_url = service_endpoint_url+urlappendGET
+                      
          for g in paramGET_obj.keys():
              if encode_get_url == "":
                  encode_get_url = encode_get_url +g+"="+paramGET_obj[g]
@@ -196,7 +199,7 @@ def oauth_bearer(request,asq, http_type):
                    }
 
          data = {}
-         req = urllib.request.Request(url, data, api_headers)
+         req = urllib.request.Request(service_endpoint_url+encode_get_url, data, api_headers)
          r = urllib.request.urlopen(req)
 
 
