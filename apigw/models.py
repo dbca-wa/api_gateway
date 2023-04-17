@@ -88,6 +88,7 @@ class APIServiceLog(models.Model):
       client_ip = models.CharField(max_length=100, null=True, blank=True)
       parameters_get = models.TextField(null=True, blank=True, default='')
       parameters_post = models.TextField(null=True, blank=True, default='')
+      parameters_urlappendGET = models.TextField(null=True, blank=True, default='')
       error  = models.CharField(max_length=1024, null=True, blank=True)
       allowed=models.BooleanField(default=False)
       created = models.DateTimeField(auto_now_add=True)

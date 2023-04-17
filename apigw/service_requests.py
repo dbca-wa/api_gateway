@@ -137,7 +137,7 @@ def oauth_bearer(request,asq, http_type):
      paramGET = request.GET.get('paramGET', '{}')
      paramPOST = request.GET.get('paramPOST', '{}')
      urlappendGET = request.GET.get('urlappendGET', '')
-     cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)
+     cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)+str(urlappendGET)
 
      apidata = cache.get(cache_string)
      if apidata is None or asq.cache_enabled is False:
@@ -199,8 +199,12 @@ def oauth_bearer(request,asq, http_type):
                    }
 
          data = {}
-         req = urllib.request.Request(service_endpoint_url+encode_get_url, data, api_headers)
-         r = urllib.request.urlopen(req)
+         print ("RQUIESTING ")
+         print (service_endpoint_url+encode_get_url)
+         r= requests.get(service_endpoint_url+encode_get_url, data=data, headers=api_headers)
+
+         #req = urllib.request.Request(service_endpoint_url+encode_get_url, data, api_headers)
+         #r = urllib.request.urlopen(req)
 
 
          
