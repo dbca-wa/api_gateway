@@ -49,6 +49,6 @@ class APIService(admin.ModelAdmin):
 
 @admin.register(models.APIServiceLog)
 class APIServiceLog(admin.ModelAdmin):
-     list_display = ('service_slug_url','server_ip','client_ip','parameters_get','parameters_post','error','allowed','created')
+     list_display = ('service_slug_url','server_ip','client_ip','parameters_get','parameters_post','parameters_urlappendGET','error','allowed','created')
      readonly_fields=('api_service','service_slug_url','server_ip','client_ip','parameters_get','parameters_post','error','allowed','created')
 

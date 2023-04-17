@@ -137,7 +137,7 @@ def oauth_bearer(request,asq, http_type):
      paramGET = request.GET.get('paramGET', '{}')
      paramPOST = request.GET.get('paramPOST', '{}')
      urlappendGET = request.GET.get('urlappendGET', '')
-     cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)
+     cache_string = 'APIService'+asq.service_slug_url+"_query"+str(paramGET)+str(paramPOST)+str(urlappendGET)
 
      apidata = cache.get(cache_string)
      if apidata is None or asq.cache_enabled is False:
@@ -156,13 +156,16 @@ def oauth_bearer(request,asq, http_type):
          if service_endpoint_url is None:
              service_endpoint_url = ''
 
-         if urlappendGET:
-             oauth2_url = oauth2_url+urlappendGET
+
          paramGET_obj= json.loads(paramGET)
          paramPOST_obj= json.loads(paramPOST)
 
          #print (paramGET_obj['boatNumber'])
          encode_get_url = ""
+         
+         if urlappendGET:
+             service_endpoint_url = service_endpoint_url+urlappendGET
+                      
          for g in paramGET_obj.keys():
              if encode_get_url == "":
                  encode_get_url = encode_get_url +g+"="+paramGET_obj[g]
@@ -196,8 +199,12 @@ def oauth_bearer(request,asq, http_type):
                    }
 
          data = {}
-         req = urllib.request.Request(url, data, api_headers)
-         r = urllib.request.urlopen(req)
+         print ("RQUIESTING ")
+         print (service_endpoint_url+encode_get_url)
+         r= requests.get(service_endpoint_url+encode_get_url, data=data, headers=api_headers)
+
+         #req = urllib.request.Request(service_endpoint_url+encode_get_url, data, api_headers)
+         #r = urllib.request.urlopen(req)
 
 
          
