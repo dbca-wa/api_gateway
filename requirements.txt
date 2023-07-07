@@ -5,5 +5,5 @@ git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
 aws-requests-auth==0.4.3
 gunicorn==19.9.0
 gevent==22.10.2
-django-encrypted-model-fields==0.6.0
+django-encrypted-model-fields==1.0.5
 ipaddress==1.0.23
