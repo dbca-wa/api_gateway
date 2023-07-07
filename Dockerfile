@@ -34,10 +34,6 @@ COPY timezone /etc/timezone
 ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-#COPY libgeos.py.patch /app/
-#RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/gis/geos/libgeos.py /app/libgeos.py.patch
-#RUN rm /app/libgeos.py.patch
-
 COPY cron /etc/cron.d/dockercron
 COPY startup.sh /
 RUN chmod 0644 /etc/cron.d/dockercron
@@ -46,11 +42,10 @@ RUN touch /var/log/cron.log
 RUN service cron start
 RUN chmod 755 /startup.sh
 COPY gunicorn.ini ./
-#COPY ledger ./ledger
 RUN touch /app/.env
+COPY .git ./.git
 COPY apigw ./apigw
 COPY manage.py ./
-#COPY .git/refs/heads/master /app/git_hash
 RUN mkdir /app/apigw/cache/
 RUN chmod 777 /app/apigw/cache/
 RUN python manage.py collectstatic --noinput
