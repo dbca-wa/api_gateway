@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "apigw",
+    "appmonitor_client",
+    "django_cron",
 ]
 
 MIDDLEWARE = [
@@ -119,3 +121,7 @@ CACHES = {
         "LOCATION": os.path.join(BASE_DIR, "apigw", "cache"),
     }
 }
+
+CRON_CLASSES = [
+    "appmonitor_client.cron.CronJobAppMonitorClient",
+]

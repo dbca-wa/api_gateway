@@ -7,3 +7,5 @@ gunicorn~=23.0
 gevent~=24.11.1
 django-encrypted-model-fields~=0.6.5
 ipaddress~=1.0.23
+git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
+django-cron==0.6.0 # This project is no longer maintained
