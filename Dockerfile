@@ -1,59 +1,92 @@
+# syntax = docker/dockerfile:1.2
+
 # Prepare the base environment.
-FROM ubuntu:22.04 as builder_base_apigw
-MAINTAINER asi@dbca.wa.gov.au
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Australia/Perth
-ENV PRODUCTION_EMAIL=True
-ENV SECRET_KEY="ThisisNotRealKey"
-# Key for Build purposes only
-ENV FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
-# Key for Build purposes only
-RUN apt-get clean
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata libreoffice cron rsyslog 
-RUN apt-get install --no-install-recommends -y libpq-dev patch
-RUN apt-get install --no-install-recommends -y postgresql-client mtr
-RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop
-RUN ln -s /usr/bin/python3 /usr/bin/python 
-#RUN ln -s /usr/bin/pip3 /usr/bin/pip
-RUN pip install --upgrade pip
-# Install Python libs from requirements.txt.
-FROM builder_base_apigw as python_libs_apigw
-WORKDIR /app
-COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt \
-  # Update the Django <1.11 bug in django/contrib/gis/geos/libgeos.py
-  # Reference: https://stackoverflow.com/questions/18643998/geodjango-geosexception-error
-  #&& sed -i -e "s/ver = geos_version().decode()/ver = geos_version().decode().split(' ')[0]/" /usr/local/lib/python3.6/dist-packages/django/contrib/gis/geos/libgeos.py \
-  && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
+FROM ubuntu:24.04 as builder_base_apigw
 
-# Install the project (ensure that frontend projects have been built prior to this step).
-FROM python_libs_apigw
-COPY timezone /etc/timezone
-ENV TZ=Australia/Perth
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+LABEL maintainer="asi@dbca.wa.gov.au"
+LABEL org.opencontainers.image.source="https://github.com/dbca-wa/api_gateway"
 
-COPY cron /etc/cron.d/dockercron
+# FIELD_ENCRYPTION_KEY dummy value below for Build purposes only
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Australia/Perth \
+    PRODUCTION_EMAIL=True  \
+    SECRET_KEY="ThisisNotRealKey" \
+    FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
+
+# Use Australian Mirrors
+RUN sed 's/archive.ubuntu.com/au.archive.ubuntu.com/g' /etc/apt/sources.list > /etc/apt/sourcesau.list && \
+    mv /etc/apt/sourcesau.list /etc/apt/sources.list
+
+RUN apt-get clean && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \
+    binutils \
+    cron \
+    gcc \
+    gdal-bin \
+    git \
+    htop \
+    libmagic-dev \
+    libpq-dev \
+    libproj-dev \
+    libreoffice \
+    mtr \
+    patch \
+    postgresql-client \
+    postgresql-client \
+    python3 \
+    python3-dev \
+    python3-pil \
+    python3-pip \
+    python3-setuptools \
+    python3-venv \
+    rsyslog  \
+    sqlite3 \
+    ssh \
+    sudo \
+    tzdata \
+    vim \
+    wget
+
+FROM builder_base_apigw as configure_apigw
+
 COPY startup.sh /
-RUN chmod 0644 /etc/cron.d/dockercron
-RUN crontab /etc/cron.d/dockercron
-RUN touch /var/log/cron.log
-RUN service cron start
-RUN chmod 755 /startup.sh
-COPY gunicorn.ini ./
-RUN touch /app/.env
-COPY .git ./.git
-COPY apigw ./apigw
-COPY manage.py ./
-RUN mkdir /app/apigw/cache/
-RUN chmod 777 /app/apigw/cache/
-RUN python manage.py collectstatic --noinput
-RUN apt-get install --no-install-recommends -y python3-pil
 
-# kubernetes health checks script
-RUN wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/main/wagov_utils/bin/health_check.sh -O /bin/health_check.sh
-RUN chmod 755 /bin/health_check.sh
+RUN chmod 755 /startup.sh && \
+    chmod +s /startup.sh && \
+    groupadd -g 5000 oim && \
+    useradd -g 5000 -u 5000 oim -s /bin/bash -d /app && \
+    usermod -a -G sudo oim && \
+    echo "oim  ALL=(ALL)  NOPASSWD: /startup.sh" > /etc/sudoers.d/oim && \
+    mkdir /app && \
+    chown -R oim:oim /app && \
+    mkdir /app/apigw/ && \
+    mkdir /app/apigw/cache/ && \
+    chmod 777 /app/apigw/cache/ && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/main/wagov_utils/bin/default_script_installer.sh -O /tmp/default_script_installer.sh && \
+    chmod 755 /tmp/default_script_installer.sh && \
+    /tmp/default_script_installer.sh && \
+    rm -rf /tmp/*
+
+FROM configure_apigw as python_dependencies_apigw
+
+WORKDIR /app
+USER oim
+ENV VIRTUAL_ENV_PATH=/app/venv
+ENV PATH=$VIRTUAL_ENV_PATH/bin:$PATH
+
+COPY --chown=oim:oim requirements.txt gunicorn.ini.py manage.py python-cron ./
+COPY --chown=oim:oim .git ./.git
+COPY --chown=oim:oim apigw ./apigw
+
+RUN python3.12 -m venv $VIRTUAL_ENV_PATH
+RUN $VIRTUAL_ENV_PATH/bin/pip3 install --upgrade pip && \
+    $VIRTUAL_ENV_PATH/bin/pip3 install --no-cache-dir -r requirements.txt && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
+
+FROM python_dependencies_apigw as launch_apigw
 
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
