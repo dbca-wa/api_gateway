@@ -13,5 +13,5 @@ if os.path.exists(BASE_DIR + "/.env"):
     confy.read_environment_file(BASE_DIR + "/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "boranga.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apigw.settings")
 application = get_wsgi_application()
