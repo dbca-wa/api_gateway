@@ -1,14 +1,14 @@
 # Gunicorn configuration settings.
+import multiprocessing
+
 # Don't start too many workers:
-workers = 4
-worker_class = "gevent"
-worker_connections = 400
+workers = min(multiprocessing.cpu_count() * 2 + 1, 4)
 
 # Give workers an expiry:
-max_requests = 500
-max_requests_jitter = 10
+max_requests = 2048
+max_requests_jitter = 256
+preload_app = True
 timeout = 600
 
 # Disable access logging.
-accesslog = "/app/logs/gunicorn.log"
-access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(T)s %(M)s %(D)s %(L)s'
+accesslog = None
