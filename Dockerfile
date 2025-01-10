@@ -86,6 +86,8 @@ RUN $VIRTUAL_ENV_PATH/bin/pip3 install --upgrade pip && \
     $VIRTUAL_ENV_PATH/bin/pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
+RUN $VIRTUAL_ENV_PATH/bin/python3 manage.py collectstatic --clear --noinput
+
 FROM python_dependencies_apigw as launch_apigw
 
 EXPOSE 8080
