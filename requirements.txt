@@ -1,12 +1,14 @@
-Django~=5.0.12
+Django~=5.2.1
 django-confy~=1.0.4
 whitenoise~=6.8.2
-dbca-utils~=2.0.3
+dbca-utils~=2.1.3
 aws-requests-auth~=0.4.3
 gunicorn~=23.0
-gevent~=24.11.1
+gevent~=25.5.1
 django-encrypted-model-fields~=0.6.5
 ipaddress~=1.0.23
+git+https://github.com/dbca-wa/django-cron.git@60d2002e58ac99a06ed66633ed76d8cf3380a762
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
 django-cron==0.6.0 # This project is no longer maintained
 python-decouple~=3.8
+setuptools~=80.8.0
