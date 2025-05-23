@@ -1,6 +1,8 @@
 from pathlib import Path
 from confy import env
 import os
+import decouple
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,3 +127,5 @@ CACHES = {
 CRON_CLASSES = [
     "appmonitor_client.cron.CronJobAppMonitorClient",
 ]
+CSRF_TRUSTED_ORIGINS_STRING = decouple.config("CSRF_TRUSTED_ORIGINS", default='[]')
+CSRF_TRUSTED_ORIGINS = json.loads(str(CSRF_TRUSTED_ORIGINS_STRING))
