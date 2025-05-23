@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.2
 
 # Prepare the base environment.
-FROM ubuntu:24.04 as builder_base_apigw
+FROM ubuntu:24.04 AS builder_base_apigw
 
 LABEL maintainer="asi@dbca.wa.gov.au"
 LABEL org.opencontainers.image.source="https://github.com/dbca-wa/api_gateway"
@@ -49,7 +49,7 @@ RUN apt-get clean && \
     vim \
     wget
 
-FROM builder_base_apigw as configure_apigw
+FROM builder_base_apigw AS configure_apigw
 
 COPY startup.sh /
 
@@ -70,7 +70,7 @@ RUN chmod 755 /startup.sh && \
     /tmp/default_script_installer.sh && \
     rm -rf /tmp/*
 
-FROM configure_apigw as python_dependencies_apigw
+FROM configure_apigw AS python_dependencies_apigw
 
 WORKDIR /app
 USER oim
@@ -88,7 +88,7 @@ RUN $VIRTUAL_ENV_PATH/bin/pip3 install --upgrade pip && \
 
 RUN $VIRTUAL_ENV_PATH/bin/python3 manage.py collectstatic --clear --noinput
 
-FROM python_dependencies_apigw as launch_apigw
+FROM python_dependencies_apigw AS launch_apigw
 
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
