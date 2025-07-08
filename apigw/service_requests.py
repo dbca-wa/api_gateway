@@ -3,6 +3,7 @@ import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from django.core.cache import cache
 from requests.auth import HTTPBasicAuth
+from apigw import utils
 import urllib.request
 import urllib.parse
 
@@ -44,15 +45,16 @@ def aws_service_request(request, asq):
         encode_get_url = ""
         for g in paramGET_obj.keys():
             if encode_get_url == "":
-                encode_get_url = encode_get_url + g + "=" + paramGET_obj[g]
+                encode_get_url = encode_get_url + g + "=" + utils.clean_url(paramGET_obj[g])
             else:
-                encode_get_url = encode_get_url + "&" + g + "=" + paramGET_obj[g]
+                encode_get_url = encode_get_url + "&" + g + "=" + utils.clean_url(paramGET_obj[g])
 
         for g in paramPOST_obj.keys():
             if encode_get_url == "":
-                encode_get_url = encode_get_url + g + "=" + paramGET_obj[g]
+                encode_get_url = encode_get_url + g + "=" + utils.clean_url(paramGET_obj[g])
             else:
-                encode_get_url = encode_get_url + "&" + g + "=" + paramGET_obj[g]
+                encode_get_url = encode_get_url + "&" + g + "=" + utils.clean_url(paramGET_obj[g])
+
         auth = AWSRequestsAuth(
             aws_access_key=aws_access_key,
             aws_secret_access_key=aws_secret_access_key,
