@@ -2,8 +2,8 @@
 
 def clean_url(value):
 
-    urlvalue = value.replace("'", "%27")
-    urlvalue = urlvalue.replace("&", "%26")
-    return urlvalue
+    value = value.replace("'", "%27")
+    value = value.replace("&", "%26")
+    return value
 
 
