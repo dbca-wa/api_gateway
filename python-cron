@@ -9,3 +9,6 @@
 
 */2 * * * * /app/venv/bin/python3 /app/manage.py runcrons >> /app/logs/cronjob.log 2>&1
 15 9 * * * /app/venv/bin/python3 /app/manage.py clear_api_service_logs >> /app/logs/clear_api_service_logs.log 2>&1
+
+# Log Rotate
+1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
