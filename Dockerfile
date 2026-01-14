@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.2
 
 # Prepare the base environment.
-FROM ubuntu:24.04 AS builder_base_apigw
+FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2510_base_python AS builder_base_apigw
 
 LABEL maintainer="asi@dbca.wa.gov.au"
 LABEL org.opencontainers.image.source="https://github.com/dbca-wa/api_gateway"
@@ -13,41 +13,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SECRET_KEY="ThisisNotRealKey" \
     FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
 
-# Use Australian Mirrors
-RUN sed 's/archive.ubuntu.com/au.archive.ubuntu.com/g' /etc/apt/sources.list > /etc/apt/sourcesau.list && \
-    mv /etc/apt/sourcesau.list /etc/apt/sources.list
 
 RUN apt-get clean && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install --no-install-recommends -y \
-    binutils \
-    cron \
-    gcc \
-    gdal-bin \
-    git \
-    htop \
-    libmagic-dev \
-    libpq-dev \
-    libproj-dev \
-    libreoffice \
-    mtr \
-    patch \
-    postgresql-client \
-    postgresql-client \
-    python3 \
-    python3-dev \
     python3-pil \
-    python3-pip \
-    python3-setuptools \
     python3-venv \
-    rsyslog  \
-    sqlite3 \
-    ssh \
-    sudo \
-    tzdata \
-    vim \
-    wget
+    ssh
+
 
 FROM builder_base_apigw AS configure_apigw
 
@@ -65,9 +39,6 @@ RUN chmod 755 /startup.sh && \
     mkdir /app/apigw/cache/ && \
     chmod 777 /app/apigw/cache/ && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
-    wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/main/wagov_utils/bin/default_script_installer.sh -O /tmp/default_script_installer.sh && \
-    chmod 755 /tmp/default_script_installer.sh && \
-    /tmp/default_script_installer.sh && \
     rm -rf /tmp/*
 
 FROM configure_apigw AS python_dependencies_apigw
