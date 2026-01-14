@@ -52,7 +52,7 @@ COPY --chown=oim:oim requirements.txt gunicorn.ini.py manage.py python-cron ./
 COPY --chown=oim:oim .git ./.git
 COPY --chown=oim:oim apigw ./apigw
 
-RUN python3.12 -m venv $VIRTUAL_ENV_PATH
+RUN python3 -m venv $VIRTUAL_ENV_PATH
 RUN $VIRTUAL_ENV_PATH/bin/pip3 install --upgrade pip && \
     $VIRTUAL_ENV_PATH/bin/pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
