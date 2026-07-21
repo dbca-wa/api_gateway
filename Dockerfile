@@ -1,8 +1,42 @@
-ARG IMAGE_TAG
-ARG IMAGE_NAME
-# Prepare the base environment.
+# =========================================================================
+# TEMPORARY STAGE: Inline Base Ubuntu 26.04 Image Build
+# This stage mimics the base image since we might not have access to GHCR
+# =========================================================================
+# Note: "ubuntu:26.04" is used as a temporary starting point.
+# If "ubuntu:26.04" is not yet available in the public registry, 
+# you may temporarily use "ubuntu:noble" (24.04) or "ubuntu:plucky" (25.10).
+FROM ubuntu:26.04 as builder_base_ubuntu2604
+MAINTAINER asi@dbca.wa.gov.au
 
-FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2510_base_python AS builder_base_apigw
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Australia/Perth
+
+RUN apt-get clean
+RUN apt-get update
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get upgrade -y
+
+RUN apt-get install --no-install-recommends -y curl wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-venv python3-dev tzdata postgresql-client
+RUN apt-get install --no-install-recommends -y build-essential
+RUN apt-get install --no-install-recommends -y libpq-dev patch libreoffice
+RUN apt-get install --no-install-recommends -y bzip2 unzip jq
+RUN apt-get install --no-install-recommends -y graphviz libgraphviz-dev pkg-config sqlite3 
+RUN ln -s /usr/bin/python3 /usr/bin/python 
+
+# Default Scripts
+RUN wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/main/wagov_utils/bin/default_script_installer.sh -O /tmp/default_script_installer.sh
+RUN chmod 755 /tmp/default_script_installer.sh
+RUN /tmp/default_script_installer.sh
+
+
+# =========================================================================
+# ORIGINAL STAGE: API Gateway Build (Modified to reference the inline stage)
+# =========================================================================
+# Temporarily pointing to the stage defined above
+FROM builder_base_ubuntu2604 AS builder_base_apigw
+# FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2510_base_python AS builder_base_apigw
 ARG IMAGE_TAG
 ARG IMAGE_NAME
 RUN echo "Building version: $IMAGE_TAG for $IMAGE_NAME"
