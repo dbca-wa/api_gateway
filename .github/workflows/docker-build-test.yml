@@ -1,0 +1,27 @@
+# .github/workflows/docker-build-test.yml
+name: Docker Build Test for Fork
+
+on:
+  push:
+    branches:
+      - "**" # Run on all branches in the fork repository
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false # Do not push the built image to any registry during tests
+          build-args: |
+            IMAGE_TAG=test-tag
+            IMAGE_NAME=api-gateway-test
