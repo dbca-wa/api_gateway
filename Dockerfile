@@ -23,6 +23,7 @@ RUN apt-get install --no-install-recommends -y build-essential
 RUN apt-get install --no-install-recommends -y libpq-dev patch libreoffice
 RUN apt-get install --no-install-recommends -y bzip2 unzip jq
 RUN apt-get install --no-install-recommends -y graphviz libgraphviz-dev pkg-config sqlite3 
+RUN apt-get install --no-install-recommends -y sudo
 RUN ln -s /usr/bin/python3 /usr/bin/python 
 
 # Default Scripts
