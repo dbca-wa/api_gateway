@@ -1,7 +1,7 @@
+FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2604_base_python AS builder_base_apigw
 ARG IMAGE_TAG
 ARG IMAGE_NAME
 
-FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2604_base_python AS builder_base_apigw
 RUN echo "Building version: $IMAGE_TAG for $IMAGE_NAME"
 ENV CONTAINER_IMAGE_TAG=${IMAGE_TAG}
 ENV CONTAINER_IMAGE_NAME=${IMAGE_NAME}
