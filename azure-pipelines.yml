@@ -59,8 +59,8 @@ stages:
         docker build \
           --build-arg IMAGE_TAG="$(tagDate)-$(shortSha)" \
           --build-arg IMAGE_NAME="$(devImageName)" \
-          -t $(devImageName):appmonitor_dev_latest \
-          -t $(devImageName):appmonitor_dev_$(tagDate)-$(shortSha) \
+          -t $(devImageName):api_gateway_dev_latest \
+          -t $(devImageName):api_gateway_dev_$(tagDate)-$(shortSha) \
           -f $(Build.SourcesDirectory)/dockerdev/Dockerfile .
       displayName: 'Docker Build Dev Image'
 
