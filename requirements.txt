@@ -7,9 +7,8 @@ gunicorn~=23.0
 gevent~=25.5.1
 django-encrypted-model-fields~=0.6.5
 ipaddress~=1.0.23
-git+https://github.com/dbca-wa/django-cron.git@60d2002e58ac99a06ed66633ed76d8cf3380a762
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
-django-cron==0.6.0 # This project is no longer maintained
+git+https://github.com/dbca-wa/django-cron#egg=django-cron
 python-decouple~=3.8
 setuptools==80.9.0
-urllib3~=2.6.0
+urllib3~=2.7.0
