@@ -18,7 +18,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get clean && \
     apt-get update && \
-    apt-get upgrade -y
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y sudo
     
 
 
