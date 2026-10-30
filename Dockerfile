@@ -18,12 +18,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get clean && \
     apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y \
-    python3-pil \
-    python3-venv \
-    ssh \
-    sudo
+    apt-get upgrade -y
+    
 
 
 FROM builder_base_apigw AS configure_apigw
@@ -55,12 +51,10 @@ COPY --chown=oim:oim requirements.txt gunicorn.ini.py manage.py python-cron ./
 COPY --chown=oim:oim .git ./.git
 COPY --chown=oim:oim apigw ./apigw
 
-RUN python3 -m venv $VIRTUAL_ENV_PATH
-RUN $VIRTUAL_ENV_PATH/bin/pip3 install --upgrade pip && \
-    $VIRTUAL_ENV_PATH/bin/pip3 install --no-cache-dir -r requirements.txt && \
-    rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
+RUN python -m venv $VIRTUAL_ENV_PATH
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN $VIRTUAL_ENV_PATH/bin/python3 manage.py collectstatic --clear --noinput
+RUN python manage.py collectstatic --clear --noinput
 
 FROM python_dependencies_apigw AS launch_apigw
 
